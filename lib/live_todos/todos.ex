@@ -42,6 +42,12 @@ defmodule LiveTodos.Todos do
     |> Repo.update()
   end
 
+  def toggle_all_todos(%{complete: complete}) do
+    Repo.update_all(Todo,
+      set: [complete: complete]
+    )
+  end
+
   def delete_todo(%Todo{} = todo) do
     Repo.delete(todo)
   end

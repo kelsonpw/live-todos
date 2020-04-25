@@ -4,7 +4,14 @@ defmodule LiveTodosWeb.PageLive do
   alias LiveTodos.Todos
 
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, todos: [], filter: "", editing: "")}
+    {:ok,
+     assign(
+       socket,
+       todos: [],
+       filter: "",
+       editing: "",
+       all_toggle: false
+     )}
   end
 
   def handle_params(_, uri, socket) do
@@ -14,6 +21,12 @@ defmodule LiveTodosWeb.PageLive do
 
   def handle_event("toggle_filter", %{"filter" => filter}, socket) do
     {:noreply, update_filter(socket, filter)}
+  end
+
+  def handle_event("toggle_all_todos", _params, socket) do
+    complete = not socket.assigns.all_toggle
+    Todos.toggle_all_todos(%{complete: complete})
+    {:noreply, update_todos(socket) |> assign(editing: "", all_toggle: complete)}
   end
 
   def handle_event("add_todo", %{"key" => "Enter", "value" => text}, socket) do
@@ -112,6 +125,10 @@ defmodule LiveTodosWeb.PageLive do
       |> Enum.filter(&(not &1.complete))
       |> Enum.count()
 
-    "<strong>#{count}</strong> #{if count > 1, do: "items", else: "item"} left"
+    "<strong>#{count}</strong> #{if count != 1, do: "items", else: "item"} left"
   end
+
+  defp show_todos?(_todos, "active"), do: true
+  defp show_todos?(_todos, "completed"), do: true
+  defp show_todos?(todos, _), do: Enum.count(todos) > 0
 end
