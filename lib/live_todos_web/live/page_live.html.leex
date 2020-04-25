@@ -1,48 +1,89 @@
-<section class="phx-hero">
-  <h1><%= gettext "Welcome to %{name}!", name: "Phoenix" %></h1>
-  <p>Peace-of-mind from prototype to production</p>
 
-  <form phx-change="suggest" phx-submit="search">
-    <input type="text" name="q" value="<%= @query %>" placeholder="Live dependency search" list="results" autocomplete="off"/>
-    <datalist id="results">
-      <%= for {app, _vsn} <- @results do %>
-        <option value="<%= app %>"><%= app %></option>
+<section class="todoapp">
+  <header class="header">
+    <h1>todos</h1>
+    <input class="new-todo" placeholder="What needs to be done?" autofocus phx-keydown="add_todo" phx-hook="addTodo">
+  </header>
+  <!-- This section should be hidden by default and shown when there are todos -->
+  <section class="main">
+    <input id="toggle-all" class="toggle-all" type="checkbox">
+    <label for="toggle-all">Mark all as complete</label>
+    <ul class="todo-list">
+      <!-- These are here just to show the structure of the list items -->
+      <!-- List items should get the class `editing` when editing and `completed` when marked as completed -->
+      <%= for todo <- @todos do %>
+        <li class="<%= if todo.complete, do: 'completed' %>">
+          <div class="view">
+            <%= if todo.complete do %>
+              <input
+                class="toggle"
+                type="checkbox"
+                phx-value-id="<%= todo.id %>"
+                checked phx-click="toggle_todo"
+              >
+            <% else %>
+              <input
+                class="toggle"
+                type="checkbox"
+                phx-value-id="<%= todo.id %>"
+                phx-click="toggle_todo"
+              >
+            <% end %>
+            <label><%= todo.text %></label>
+          <button
+            class="destroy"
+            phx-value-id="<%= todo.id %>"
+            phx-click="destroy_todo"
+          ></button>
+          </div>
+          <input class="edit" value="Rule the web">
+        </li>
       <% end %>
-    </datalist>
-    <button type="submit" phx-disable-with="Searching...">Go to Hexdocs</button>
-  </form>
-</section>
-
-<section class="row">
-  <article class="column">
-    <h2>Resources</h2>
-    <ul>
+    </ul>
+  </section>
+  <!-- This footer should hidden by default and shown when there are todos -->
+  <footer class="footer">
+    <!-- This should be `0 items left` by default -->
+    <span class="todo-count"><strong>0</strong> item left</span>
+    <!-- Remove this if you don't implement routing -->
+    <ul class="filters">
       <li>
-        <a href="https://hexdocs.pm/phoenix/overview.html">Guides &amp; Docs</a>
+        <a
+          class="<%= filter_class(all, @filter) %>"
+          href="#/"
+          phx-value-filter="all"
+          phx-click="toggle_filter"
+        >
+          All
+        </a>
       </li>
       <li>
-        <a href="https://github.com/phoenixframework/phoenix">Source</a>
+        <a
+          class="<%= filter_class(active, @filter) %>"
+          href="#/active"
+          phx-value-filter="active"
+          phx-click="toggle_filter"
+        >
+          Active
+        </a>
       </li>
       <li>
-        <a href="https://github.com/phoenixframework/phoenix/blob/v1.5/CHANGELOG.md">v1.5 Changelog</a>
+        <a
+          class="<%= filter_class(completed, @filter) %>"
+          href="#/completed"
+          phx-value-filter="completed"
+          phx-click="toggle_filter"
+        >
+          Completed
+        </a>
       </li>
     </ul>
-  </article>
-  <article class="column">
-    <h2>Help</h2>
-    <ul>
-      <li>
-        <a href="https://elixirforum.com/c/phoenix-forum">Forum</a>
-      </li>
-      <li>
-        <a href="https://webchat.freenode.net/?channels=elixir-lang">#elixir-lang on Freenode IRC</a>
-      </li>
-      <li>
-        <a href="https://twitter.com/elixirphoenix">Twitter @elixirphoenix</a>
-      </li>
-      <li>
-        <a href="https://elixir-slackin.herokuapp.com/">Elixir on Slack</a>
-      </li>
-    </ul>
-  </article>
+    <!-- Hidden if no completed items are left ↓ -->
+    <button class="clear-completed">Clear completed</button>
+  </footer>
 </section>
+<footer class="info">
+  <p>Double-click to edit a todo</p>
+  <p>Created by <a href="http://github.com/kelsonpw">Kelson Warner</a></p>
+  <p>Part of <a href="http://todomvc.com">TodoMVC</a></p>
+</footer>
