@@ -101,6 +101,11 @@ defmodule LiveTodosWeb.PageLive do
   defp active, do: "active"
   defp completed, do: "completed"
 
+  defp todo_item_class(%{complete: true}, _), do: "completed"
+
+  defp todo_item_class(%{complete: false, id: id}, current),
+    do: if(Integer.to_string(id) == current, do: "editing")
+
   defp items_remaining(todos) do
     count =
       todos
@@ -109,6 +114,4 @@ defmodule LiveTodosWeb.PageLive do
 
     "<strong>#{count}</strong> #{if count > 1, do: "items", else: "item"} left"
   end
-
-  defp is_editing(id, current), do: Integer.to_string(id) == current
 end

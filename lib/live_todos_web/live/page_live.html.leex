@@ -18,7 +18,7 @@
       <ul class="todo-list">
         <!-- List items should get the class `editing` when editing and `completed` when marked as completed -->
         <%= for todo <- @todos do %>
-          <li class="<%= if todo.complete, do: 'completed', else:  if is_editing(todo.id, @editing), do: 'editing' %>">
+          <li class="<%= todo_item_class(todo, @editing) %>">
             <div class="view">
               <%= if todo.complete do %>
                 <input
