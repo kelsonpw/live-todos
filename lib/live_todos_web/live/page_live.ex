@@ -4,7 +4,7 @@ defmodule LiveTodosWeb.PageLive do
   alias LiveTodos.Todos
 
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, todos: [], filter: "")}
+    {:ok, assign(socket, todos: [], filter: "", editing: "")}
   end
 
   def handle_params(_, uri, socket) do
@@ -26,10 +26,24 @@ defmodule LiveTodosWeb.PageLive do
     end
   end
 
+  def handle_event("add_todo", _params, socket) do
+    {:noreply, socket}
+  end
+
+  def handle_event("edit_todo", %{"key" => "Enter", "id" => id, "value" => text}, socket),
+    do: handle_edit(socket, %{id: id, text: text})
+
+  def handle_event("edit_todo_blur", %{"id" => id, "value" => text}, socket),
+    do: handle_edit(socket, %{id: id, text: text})
+
+  def handle_event("edit_todo", _params, socket) do
+    {:noreply, socket}
+  end
+
   def handle_event("toggle_todo", %{"id" => id}, socket) do
     todo = Todos.get_todo!(id)
 
-    case Todos.update_todo(todo, %{complete: !todo.complete}) do
+    case todo |> Todos.update_todo(%{complete: !todo.complete}) do
       {:ok, _} ->
         {:noreply, update_todos(socket)}
 
@@ -38,8 +52,8 @@ defmodule LiveTodosWeb.PageLive do
     end
   end
 
-  def handle_event("add_todo", _params, socket) do
-    {:noreply, socket}
+  def handle_event("toggle_editing", %{"id" => id}, socket) do
+    {:noreply, assign(socket, editing: id)}
   end
 
   def handle_event("destroy_todo", %{"id" => id}, socket) do
@@ -52,14 +66,49 @@ defmodule LiveTodosWeb.PageLive do
     end
   end
 
+  def handle_event("destroy_completed", _, socket) do
+    case Todos.delete_completed() do
+      nil ->
+        {:noreply, socket}
+
+      _ ->
+        {:noreply, update_todos(socket)}
+    end
+  end
+
+  defp handle_edit(socket, %{id: id, text: text}) do
+    case id
+         |> Todos.get_todo!()
+         |> Todos.update_todo(%{text: text}) do
+      {:ok, _} ->
+        {:noreply, update_todos(socket) |> assign(editing: "")}
+
+      _ ->
+        {:noreply, socket}
+    end
+  end
+
   defp update_todos(socket), do: update_filter(socket, socket.assigns.filter)
 
   defp update_filter(socket, filter),
     do: assign(socket, filter: filter, todos: Todos.filter_todos(filter))
 
-  defp filter_class(element, current), do: if(element == current, do: "selected")
+  defp filter_class("all", ""), do: "selected"
+  defp filter_class(mode, mode), do: "selected"
+  defp filter_class(_, __), do: ""
 
   defp all, do: "all"
   defp active, do: "active"
   defp completed, do: "completed"
+
+  defp items_remaining(todos) do
+    count =
+      todos
+      |> Enum.filter(&(not &1.complete))
+      |> Enum.count()
+
+    "<strong>#{count}</strong> #{if count > 1, do: "items", else: "item"} left"
+  end
+
+  defp is_editing(id, current), do: Integer.to_string(id) == current
 end
