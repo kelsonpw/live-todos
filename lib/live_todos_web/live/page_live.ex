@@ -33,12 +33,12 @@ defmodule LiveTodosWeb.PageLive do
   def handle_event("edit_todo", %{"key" => "Enter", "id" => id, "value" => text}, socket),
     do: handle_edit(socket, %{id: id, text: text})
 
-  def handle_event("edit_todo_blur", %{"id" => id, "value" => text}, socket),
-    do: handle_edit(socket, %{id: id, text: text})
-
   def handle_event("edit_todo", _params, socket) do
     {:noreply, socket}
   end
+
+  def handle_event("edit_todo_blur", %{"id" => id, "value" => text}, socket),
+    do: handle_edit(socket, %{id: id, text: text})
 
   def handle_event("toggle_todo", %{"id" => id}, socket) do
     todo = Todos.get_todo!(id)
