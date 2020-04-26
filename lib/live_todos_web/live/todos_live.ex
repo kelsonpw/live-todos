@@ -1,4 +1,4 @@
-defmodule LiveTodosWeb.PageLive do
+defmodule LiveTodosWeb.TodosLive do
   use LiveTodosWeb, :live_view
 
   alias LiveTodos.Todos
